@@ -1,0 +1,90 @@
+- hosts: 127.0.0.1
+  connection: local
+
+  tasks:
+    - name: install pyenv packages
+      # these should have been installed manually when installing pyenv
+      # but just in case...
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - zlib-devel
+        - bzip2
+        - bzip2-devel
+        - readline-devel
+        - sqlite
+        - sqlite-devel
+        - openssl-devel
+
+    - name: install ansible packages
+      # these should have been installed manually when installing ansible
+      # but just in case...
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - libffi-devel
+        - redhat-rpm-config
+        - python-devel
+
+    - name: install basic packages
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - i3
+        - rabbitmq-server
+        - redis
+        - patch
+
+    - name: install postgres
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - postgresql-server
+        - postgresql-contrib
+        - postgresql-devel
+      notify:
+        - init postgres
+
+    - name: Install emacs
+      dnf: name=emacs state=present
+      become: yes
+
+    - name: install emacs Live packs
+      shell: "{{ item }}"
+      with_items:
+        - rmdir .emacs.d
+        - git clone https://github.com/overtone/emacs-live.git .emacs.d
+        - make -C .emacs.d/packs/stable/org-pack/lib/org-mode autoloads
+        # - mkdir --parents .live-packs/{{ ansible_user_id }}-pack
+        # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
+        - git clone --recursive git@gh.leapfrogonline.com:JFosco/emacs-live-jfosco-pack.git .live-packs/{{ ansible_user_id }}-pack
+        - echo "(live-add-packs '(~/.live-packs/jfosco-pack))" > .emacs-live.el
+      args:
+        chdir: $HOME
+        creates: .emacs-live.el
+
+    - name: install applications
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - keepass
+
+  handlers:
+    # not really tested
+    - name: init postgres
+      become: yes
+      shell: "{{ item }}"
+      with_items:
+        - postgresql-setup --initdb --unit postgresql
+        - systemctl enable postgresql
+      # still need to create your user and create default db
+
+
+# NOTES
+# currently for LFO apps libsodium 0.5.0 must be installed
+# also you mest export LD_LIBRARY_PATH="/usr/local/lib"
