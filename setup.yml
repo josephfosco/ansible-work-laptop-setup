@@ -34,9 +34,12 @@
         {{ ansible_pkg_mgr }} name={{ item }} state=present
       with_items:
         - i3
+        - tmux
         - rabbitmq-server
         - redis
         - patch
+        - libyaml-devel    # for compiling ruby versions
+        - gdbm-devel       # for compiling ruby versions
 
     - name: install postgres
       become: yes
@@ -84,7 +87,13 @@
         - systemctl enable postgresql
       # still need to create your user and create default db
 
+# TO BE ADDED TO THIS
+#  - install for rbenv
+#  - install for ruby-build
+
 
 # NOTES
 # currently for LFO apps libsodium 0.5.0 must be installed
 # also you mest export LD_LIBRARY_PATH="/usr/local/lib"
+#
+# Generate and add your ssh key to github before running
