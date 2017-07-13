@@ -81,6 +81,13 @@
         disable_gpg_check: yes
         state: present
 
+    - name: install firefox developer edition
+      shell: "{{ item }}"
+      with_items:
+        - ./firefox_developer_edition.sh
+      args:
+        creates: /opt/firefox-developer/firefox/firefox
+
     - name: install applications
       become: yes
       action: >
@@ -150,3 +157,11 @@
 # add your userid with superuser privilidges
 # in /var/lib/pgsql/data/pg_hba.conf (or wherever pg_hba.conf is)
 # change all entries that are "ident" under METHOD to "trust"
+#
+# For Chrome
+# need to figure out how to not download .rpm every time
+#
+# For Firefox Developer Edition
+# need to add Alias in .bashrc/.bash_profile to distinguish from system firefox
+# alias firefoxd='nohup /opt/firefox-developer/firefox/firefox &>/dev/null &'
+#
