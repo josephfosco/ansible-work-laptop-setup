@@ -74,6 +74,13 @@
         chdir: $HOME
         creates: .emacs-live.el
 
+    - name: install chrome
+      become: yes
+      dnf:
+        name: https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm
+        disable_gpg_check: yes
+        state: present
+
     - name: install applications
       become: yes
       action: >
@@ -89,16 +96,6 @@
         # to make certain this is not updated by dnf
         # add the line
         # exclude=ImageMagick
-        # to the dnf config file (/etc/dnf/dnf.conf)
-
-    - name: install ImageMagick-devel (v6) for fox
-      become: yes
-      dnf:
-        name: ImageMagick-devel-6.9.3.0
-        state: present
-        # to make certain this is not updated by dnf
-        # add the line
-        # exclude=ImageMagick-devel
         # to the dnf config file (/etc/dnf/dnf.conf)
 
     - name: install packages for lfo apps
@@ -133,6 +130,7 @@
       with_items:
         - cd ~/.nodenv && src/configure && make -C src
         - echo 'export PATH="$HOME/.nodenv/bin:$PATH"' >> ~/.bash_profile
+        - eval "$(nodenv init -)"
         - git clone https://github.com/nodenv/node-build.git ~/.nodenv/plugins/node-build
       args:
         chdir: $HOME
