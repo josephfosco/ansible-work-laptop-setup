@@ -44,6 +44,10 @@
         - libyaml-devel    # for compiling ruby versions
         - gdbm-devel       # for compiling ruby versions
         - htop
+        - gcc-c++
+        - openldap-devel   # for python ldap package (mind)
+        - libxml2-devel    # for lxml.etree (mind)
+        - libxslt-devel    # for lxml.etree (mind)
 
     - name: install postgres
       become: yes
@@ -141,6 +145,14 @@
         - git clone https://github.com/nodenv/node-build.git ~/.nodenv/plugins/node-build
       args:
         chdir: $HOME
+
+    # not really tested
+    - name: install node-build-update-defs
+      shell: "{{ item }}"
+      with_items:
+        - git clone https://github.com/nodenv/node-build-update-defs.git ~/.nodenv/plugins/node-build-update-defs
+      args:
+        creates: ~/.nodenv/plugins/node-build-update-defs
 
 # TO BE ADDED TO THIS
 #  - install for rbenv
