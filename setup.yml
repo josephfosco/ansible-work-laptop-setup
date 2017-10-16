@@ -78,6 +78,26 @@
         chdir: $HOME
         creates: .emacs-live.el
 
+    # - name: install rpmfusion repo for ffmpeg
+    #   become: yes
+    #   dnf:
+    #     name: 'https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm'
+    #     disable_gpg_check: yes
+    #     state: present
+
+    # install ffdmpeg to play video on twitter
+    # must first install the rpmfusion-free repo using
+    # sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+    # or whatever command is suggested at https://rpmfusion.org/Configuration
+    # I attemptesd to do this automatically using the above commented out step "install rpmfusion repo for ffmpeg"
+    # but was unable to make this work
+    - name: install ffmpeg
+      become: yes
+      dnf:
+        name: ffmpeg
+        enablerepo: rpmfusion
+        state: present
+
     - name: install chrome
       become: yes
       dnf:
