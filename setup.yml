@@ -49,6 +49,13 @@
         - libxml2-devel    # for lxml.etree (mind)
         - libxslt-devel    # for lxml.etree (mind)
 
+    # -----------------------------------------------------
+    #
+    # Need to enable rabbitmq management plugin
+    # sudo rabbitmq-plugins enable rabbitmq_management
+    #
+    # -----------------------------------------------------
+
     - name: install postgres
       become: yes
       action: >
@@ -136,6 +143,8 @@
       with_items:
         - GraphicsMagick   # for fox with ImageMagick v. 6
         - npm
+        - vsftpd # ftp server for testing psh apps
+        - lftp   # ftp command for terminal
 
     - name: install nodenv
       shell: "{{ item }}"
@@ -145,6 +154,19 @@
         chdir: $HOME
         creates: ~/.nodenv
       notify: setup nodenv
+
+      # **************************************************
+      #  Things I am testing
+
+    - name: install docker
+      become: yes
+      action: >
+        {{ ansible_pkg_mgr }} name={{ item }} state=present
+      with_items:
+        - docker
+
+
+
 
   handlers:
     # not really tested
