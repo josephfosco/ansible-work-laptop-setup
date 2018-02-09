@@ -124,7 +124,7 @@
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
       with_items:
-        - keepass
+        - keepassxc
 
     - name: install ImageMagick (v6) for fox
       become: yes
@@ -204,6 +204,10 @@
 # NOTES
 # currently for LFO apps libsodium 0.5.0 must be installed
 # also you mest export LD_LIBRARY_PATH="/usr/local/lib"
+#
+# must also symlink libreadline for python shell
+#   cd /usr/lib64
+#   sudo ln -s libreadline.so.7.0 libreadline.so.6
 #
 # Generate and add your ssh key to github before running
 #
