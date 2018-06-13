@@ -48,6 +48,16 @@
         - openldap-devel   # for python ldap package (mind)
         - libxml2-devel    # for lxml.etree (mind)
         - libxslt-devel    # for lxml.etree (mind)
+        - remmina          # Windows remote desktop client
+        - screen           # new screen on same machine
+        - sway             # i3 for wayland
+
+    # - name: install leapfrog git commands
+    #   shell: "{{ item }}"
+    #   with_items:
+    #     - curl https://gh.leapfrogonline.net/raw/ops/git_commands/master/install.sh > tmp-gitcommands.txt
+    #   notify:
+    #     - install leapfrog git commands from file
 
     # -----------------------------------------------------
     #
@@ -189,6 +199,14 @@
       args:
         chdir: $HOME
 
+    # Need to get this working with above install command
+    # - name: install leapfrog git commands from file
+    #   become: yes
+    #   shell: "{{ item }}"
+    #   with_items:
+    #     - sh tmp-gitcommands.txt
+    #     - rm tmp_gitcommands.txt
+
     # not really tested
     - name: install node-build-update-defs
       shell: "{{ item }}"
@@ -200,6 +218,11 @@
 # TO BE ADDED TO THIS
 #  - install for rbenv
 #  - install for ruby-build
+#    to install ruby-build cd ~/.rbenv/plugins (the plugins subdir might need to be created
+#       git clone https://github.com/rbenv/ruby-build
+#       echo 'export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' >> ~/.bash_profile
+#  - run gem install capistrano -v "2.15.4"   # for LFO deploys
+#  - run gem install diplomat                 # for LFO deploys
 
 
 # NOTES

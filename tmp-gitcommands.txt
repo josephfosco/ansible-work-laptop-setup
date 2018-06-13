@@ -1,0 +1,33 @@
+#!/bin/bash
+# -*- mode: sh -*-
+
+set -e
+
+# TODO: check that path in on PATH
+
+if [[ `id -u` -ne 0 ]]; then
+    echo "If you're using the default path (/usr/local/bin), you probably want to be running this as root"
+fi
+
+if [[ $1 ]]; then
+    install_path=$1
+else
+    install_path='/usr/local/bin'
+fi
+
+if [[ `git config --get remote.origin.url` ]]; then
+  remote_url=`git config --get remote.origin.url`
+fi
+
+
+if [[ -d .git ]] && [[ $remote_url == *"/git_commands"* ]]; then
+    cmd_path='.'
+else
+    cmd_path='/tmp/git_commands'
+    git clone git@gh.leapfrogonline.net:ops/git_commands.git $cmd_path --depth 1
+fi
+
+ls $cmd_path/git-* | while read cmd; do
+    cp $cmd $install_path/
+done
+rm -rf /tmp/git_commands
