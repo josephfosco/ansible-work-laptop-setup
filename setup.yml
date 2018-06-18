@@ -37,6 +37,7 @@
         - i3lock
         - xautolock        # lock screen after an amount of inactivity
         - xbacklight       # adjust screen brightness
+        - pavucontrol      # pulse audio control panel
         - tmux
         - rabbitmq-server
         - redis
