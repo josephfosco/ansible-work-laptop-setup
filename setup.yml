@@ -37,6 +37,7 @@
         - i3lock
         - xautolock        # lock screen after an amount of inactivity
         - xbacklight       # adjust screen brightness
+        - xsel             # to allow copy/paste from emacs to system
         - pavucontrol      # pulse audio control panel
         - tmux
         - rabbitmq-server
@@ -50,8 +51,8 @@
         - libxml2-devel    # for lxml.etree (mind)
         - libxslt-devel    # for lxml.etree (mind)
         - remmina          # Windows remote desktop client
-        - screen           # new screen on same machine
         - sway             # i3 for wayland
+        - zeal             # offline document viewer
 
     # - name: install leapfrog git commands
     #   shell: "{{ item }}"
@@ -67,6 +68,8 @@
     #
     # -----------------------------------------------------
 
+    # Would be better to specify postgres version here so it
+    # doesn't get accidentally upgraded
     - name: install postgres
       become: yes
       action: >
