@@ -164,6 +164,7 @@
         - gcc-c++            # for hashi (to build pyodbc)
         - python3-devel      # for hashi (to build pyodbc)
         - unixODBC-devel     # for hashi (to build pyodbc)
+        - git-subtree      # needed for "git catalina pull <module>"
 
     - name: download yarn
       become: yes
