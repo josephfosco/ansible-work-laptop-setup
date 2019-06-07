@@ -1,0 +1,67 @@
+Starting new
+
+- Create ~/sys subdirectory to place commands
+
+- putopenconnect command to log into vpn in ~/sys
+sudo openconnect vpn.leapfrogonline.com --pid-file=/var/run/vpnc/pid -b
+
+- logon to vpn
+
+create ssh key using ssh-keygen
+Add ssh key to github
+
+
+- create ~/sys/ansible
+- clone ansible into ~/sys/ansible
+- clone personal laptop setup into ~/sys/ansible/setip
+- sudo dnf groupinstall 'C Development Tools and Libraries'
+- install pyenv using pyenv installer -  https://github.com/pyenv/pyenv-installer
+- create python-version file in ~/sys/ansible (currently 3.6.1)
+- install manual depenedencies for pyenv and ansible listed in ~/sys/ansible/setup/setup.yml at top of file
+- pyenv install <above pytonn version>
+- create ansible virtual env. (in ~/sys/ansible python -m venv ./env)
+- follow instructions in ansible installation instructions to get ansible running from source
+- install ansible python requirements from ~/sys/ansible/ansible ../env/bin/pip install -r requirements.txt
+
+- Install Slack for linux from the slack website (in Gnome)
+- start i3
+- in ~/config/i3/config change terminal
+  - under # Start a tern=minal
+  - copy the current line
+  - comment out the current line
+  - in the new line change i3-sensible-terminal to gnome-terminal
+
+- Create new terminal defaults
+- open a terminal
+  - right click in the terminal to show the menu
+  - select Preferences
+  - click the dropdown arrow in the current preference (Unnamed) and select Clone
+  - Change name to Green and click Clone
+  - under Colors Delault color Text #2ccf03 Background #000000
+  - Click on Bold Color and set text to #00ff00
+  - Under Palette change "Built-inschemes" to "Xterm"
+  - select "Show bold text in bright colors"
+  - under scrolling increase scrollback to 10000
+  - in the left side menu select General
+    - un select all check boxes (esp "Show menubar by default in new terminals")
+  - in the left sidebar click the dropdown arrow next to Green and click "Set as default"
+
+- Adding your postgres user
+  - sudo su - postgres
+  - psql
+  - create user jfosco with createdb;
+  - alter user jfosco SUPERUSER;
+
+
+
+
+Firefox add-ons
+---------------------
+u-block origin
+privacy badger
+remove cookies
+FireShot
+CanvasBlocker
+Decentraleyes
+Smart Referer
+Https Everywhere

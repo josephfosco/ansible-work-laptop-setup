@@ -1,5 +1,10 @@
 - hosts: 127.0.0.1
   connection: local
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+# need to start by installing 'C Development Tols and Libraries'
+# sudo dnf groupinstall 'C Development Tools and Libraries'
 
   tasks:
     - name: install pyenv packages
@@ -8,7 +13,7 @@
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         - zlib-devel
         - bzip2
         - bzip2-devel
@@ -16,6 +21,8 @@
         - sqlite
         - sqlite-devel
         - openssl-devel
+        - xz-devel
+        - findutils
 
     - name: install ansible packages
       # these should have been installed manually when installing ansible
@@ -23,7 +30,7 @@
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         - libffi-devel
         - redhat-rpm-config
         - python-devel
@@ -32,7 +39,7 @@
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         - i3
         - i3lock
         - xautolock        # lock screen after an amount of inactivity
@@ -52,7 +59,7 @@
         - libxslt-devel    # for lxml.etree (mind)
         - remmina          # Windows remote desktop client
         - sway             # i3 for wayland
-        - zeal             # offline document viewer
+        # - zeal             # offline document viewer (not yet avilable for fedora 30)
 
     # - name: install leapfrog git commands
     #   shell: "{{ item }}"
@@ -68,50 +75,75 @@
     #
     # -----------------------------------------------------
 
-    # Would be better to specify postgres version here so it
-    # doesn't get accidentally upgraded
-    - name: install postgres
+    # POSTGRES 9.6
+    - name: install postgres 9.6 repo
       become: yes
-      action: >
-        {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
-        - postgresql-server
-        - postgresql-contrib
-        - postgresql-devel
+      dnf:
+        name: 'https://download.postgresql.org/pub/repos/yum/reporpms/F-{{ hostvars[inventory_hostname].ansible_distribution_major_version }}-x86_64/pgdg-fedora-repo-latest.noarch.rpm'
+        disable_gpg_check: yes
+        state: present
+      tags:
+        - postgres96-all
+
+    - name: install postgres client packages
+      become: yes
+      dnf:
+        name: postgresql96
+        enablerepo: pgdg96
+        state: present
+      tags:
+        - postgres96-all
+
+    - name: install postgres server packages
+      become: yes
+      dnf:
+        name: postgresql96-server
+        enablerepo: pgdg96
+        state: present
+      tags:
+        - postgres96-all
+
+    - name: install postgres contrib packages
+      become: yes
+      dnf:
+        name: postgresql96-contrib
+        enablerepo: pgdg96
+        state: present
+      tags:
+        - postgres96-all
       notify:
         - init postgres
+
+    ## END POSTGRES ##
 
     - name: Install emacs
       dnf: name=emacs state=present
       become: yes
 
+    # - mkdir --parents .live-packs/{{ ansible_user_id }}-pack
+    # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
     - name: install emacs Live packs
-      shell: "{{ item }}"
-      with_items:
-        - rmdir .emacs.d
-        - git clone https://github.com/overtone/emacs-live.git .emacs.d
-        - make -C .emacs.d/packs/stable/org-pack/lib/org-mode autoloads
-        # - mkdir --parents .live-packs/{{ ansible_user_id }}-pack
-        # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
-        - git clone --recursive git@gh.leapfrogonline.com:JFosco/emacs-live-jfosco-pack.git .live-packs/{{ ansible_user_id }}-pack
-        - echo "(live-add-packs '(~/.live-packs/jfosco-pack))" > .emacs-live.el
+      shell: |
+        git clone https://github.com/overtone/emacs-live.git .emacs.d
+        make -C .emacs.d/packs/stable/org-pack/lib/org-mode autoloads
+        git clone --recursive git@gh.leapfrogonline.net:JFosco/emacs-live-jfosco-pack.git .live-packs/{{ ansible_user_id }}-pack
+        echo "(live-add-packs '(~/.live-packs/jfosco-pack))" > .emacs-live.el
       args:
         chdir: $HOME
         creates: .emacs-live.el
-
-    # - name: install rpmfusion repo for ffmpeg
-    #   become: yes
-    #   dnf:
-    #     name: 'https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm'
-    #     disable_gpg_check: yes
-    #     state: present
+      tags:
+        - emacs-live
 
     # install ffdmpeg to play video on twitter
-    # must first install the rpmfusion-free repo using
-    # sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-    # or whatever command is suggested at https://rpmfusion.org/Configuration
-    # I attemptesd to do this automatically using the above commented out step "install rpmfusion repo for ffmpeg"
-    # but was unable to make this work
+    - name: install rpmfusion repo for ffmpeg
+      become: yes
+      dnf:
+        name: 'https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-{{ hostvars[inventory_hostname].ansible_distribution_major_version }}.noarch.rpm'
+        disable_gpg_check: yes
+        state: present
+      tags:
+        - rpmfusion-repo
+
     - name: install ffmpeg
       become: yes
       dnf:
@@ -126,19 +158,13 @@
         disable_gpg_check: yes
         state: present
 
-    - name: install firefox developer edition
-      shell: "{{ item }}"
-      with_items:
-        - ./firefox_developer_edition.sh
-      args:
-        creates: /opt/firefox-developer/firefox/firefox
-
     - name: install applications
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         - keepassxc
+        - gparted
 
     # - name: install ImageMagick (v6) for fox
     #   become: yes
@@ -154,7 +180,7 @@
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         # - ImageMagick-devel-6.9.3.0
         - GraphicsMagick   # for fox with ImageMagick v. 6
         - npm
@@ -168,18 +194,14 @@
 
     - name: download yarn
       become: yes
-      shell: "{{ item }}"
-      with_items:
-        curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
+      shell: curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
       args:
         creates: /etc/yum.repos.d/yarn.repo
       notify:
         - install yarn
 
     - name: install nodenv
-      shell: "{{ item }}"
-      with_items:
-        - git clone https://github.com/nodenv/nodenv.git ~/.nodenv
+      shell: git clone https://github.com/nodenv/nodenv.git ~/.nodenv
       args:
         chdir: $HOME
         creates: ~/.nodenv
@@ -188,29 +210,29 @@
       # **************************************************
       #  Things I am testing
 
-    - name: install docker
-      become: yes
-      action: >
-        {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
-        - docker
+    # - name: install docker
+      # become: yes
+      # action: >
+      #   {{ ansible_pkg_mgr }} name={{ item }} state=present
+      # with_items:
+      #   - docker
 
 
 
 
   handlers:
-    # not really tested
     - name: init postgres
       become: yes
-      shell: "{{ item }}"
-      with_items:
-        - postgresql-setup --initdb --unit postgresql
-        - systemctl enable postgresql
-      # still need to create your user and create default db
+      shell: |
+        /usr/pgsql-9.6/bin/postgresql96-setup initdb
+        systemctl enable postgresql-9.6
+        systemctl start postgresql-9.6
+      tags:
+        postgres96-all
 
     - name: setup nodenv
       shell: "{{ item }}"
-      with_items:
+      loop:
         - cd ~/.nodenv && src/configure && make -C src
         - echo 'export PATH="$HOME/.nodenv/bin:$PATH"' >> ~/.bash_profile
         - eval "$(nodenv init -)"
@@ -222,7 +244,7 @@
       become: yes
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
-      with_items:
+      loop:
         - yarn
 
 
@@ -237,7 +259,7 @@
     # not really tested
     - name: install node-build-update-defs
       shell: "{{ item }}"
-      with_items:
+      loop:
         - git clone https://github.com/nodenv/node-build-update-defs.git ~/.nodenv/plugins/node-build-update-defs
       args:
         creates: ~/.nodenv/plugins/node-build-update-defs
@@ -269,8 +291,4 @@
 #
 # For Chrome
 # need to figure out how to not download .rpm every time
-#
-# For Firefox Developer Edition
-# need to add Alias in .bashrc/.bash_profile to distinguish from system firefox
-# alias firefoxd='nohup /opt/firefox-developer/firefox/firefox &>/dev/null &'
 #
