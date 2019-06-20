@@ -40,6 +40,7 @@
       action: >
         {{ ansible_pkg_mgr }} name={{ item }} state=present
       loop:
+        - libsodium
         - i3
         - i3lock
         - xautolock        # lock screen after an amount of inactivity
@@ -59,7 +60,17 @@
         - libxslt-devel    # for lxml.etree (mind)
         - remmina          # Windows remote desktop client
         - sway             # i3 for wayland
-        # - zeal             # offline document viewer (not yet avilable for fedora 30)
+        - cmake            # for redissearch
+        - zeal             # offline document viewer (not yet avilable for fedora 30)
+      # notify:           # it seems this is not needed when using the compatability module below
+      #   - libsodium exports
+
+    - name: libsodium.so.1 compatability exports
+      become: yes
+      dnf:
+        name: libxcrypt-compat
+        state: present
+      tags: libsodium-compat
 
     # - name: install leapfrog git commands
     #   shell: "{{ item }}"
@@ -229,6 +240,15 @@
         systemctl start postgresql-9.6
       tags:
         postgres96-all
+
+    # - name: libsodium exports
+    #   shell: "{{ item }}"
+    #   loop:
+    #     - echo '#for libsodium' >> ~/.bash_profile
+    #     - echo 'export LD_LIBRARY_PATH="/usr/local/lib"' >> ~/.bash_profile
+    #   args:
+    #     chdir: $HOME
+    #   tags: libsodium-exports
 
     - name: setup nodenv
       shell: "{{ item }}"
