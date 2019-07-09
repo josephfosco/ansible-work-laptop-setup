@@ -7,6 +7,12 @@
 # sudo dnf groupinstall 'C Development Tools and Libraries'
 
   tasks:
+    # UNCOMMENT AND USE THIS TO TRIGGER A HANDLER
+    # - name: trigger nginx-restart
+    #   command: /bin/true
+    #   notify:
+    #     - enable rabbitmq admin
+
     - name: install pyenv packages
       # these should have been installed manually when installing pyenv
       # but just in case...
@@ -33,7 +39,6 @@
       loop:
         - libffi-devel
         - redhat-rpm-config
-        - python-devel
 
     - name: install basic packages
       become: yes
@@ -48,7 +53,6 @@
         - xsel             # to allow copy/paste from emacs to system
         - pavucontrol      # pulse audio control panel
         - tmux
-        - rabbitmq-server
         - redis
         - patch
         - libyaml-devel    # for compiling ruby versions
@@ -64,6 +68,14 @@
         - zeal             # offline document viewer (not yet avilable for fedora 30)
       # notify:           # it seems this is not needed when using the compatability module below
       #   - libsodium exports
+
+    - name: install rabbitmq
+      become: yes
+      dnf:
+        name: rabbitmq-server
+        state: present
+      notify:
+        - enable rabbitmq admin
 
     - name: libsodium.so.1 compatability exports
       become: yes
@@ -109,6 +121,15 @@
       become: yes
       dnf:
         name: postgresql96-server
+        enablerepo: pgdg96
+        state: present
+      tags:
+        - postgres96-all
+
+    - name: install postgres devel packages
+      become: yes
+      dnf:
+        name: postgresql96-devel
         enablerepo: pgdg96
         state: present
       tags:
@@ -218,6 +239,19 @@
         creates: ~/.nodenv
       notify: setup nodenv
 
+    - name: create src directory
+      shell: mkdir src
+      args:
+        chdir: $HOME
+        creates: ~/src
+
+    - name: install redissearch
+      shell: git clone https://github.com/RediSearch/RediSearch.git
+      args:
+        chdir: ~/src
+        creates: ~/src/RediSearch
+      notify: make redissearch
+
       # **************************************************
       #  Things I am testing
 
@@ -232,6 +266,11 @@
 
 
   handlers:
+    - name: enable rabbitmq admin
+      become: yes
+      shell: |
+        rabbitmq-plugins enable rabbitmq_management
+
     - name: init postgres
       become: yes
       shell: |
@@ -284,7 +323,14 @@
       args:
         creates: ~/.nodenv/plugins/node-build-update-defs
 
-# TO BE ADDED TO THIS
+    - name: make redissearch
+      shell: make
+      args:
+        chdir: ~/src/RediSearch
+        creates: ~/src/RediSearch/redissearch.so
+      # still need to create a redis.conf file currently in ~/.config/redis.conf
+
+        # TO BE ADDED TO THIS
 #  - install for rbenv
 #  - install for ruby-build
 #    to install ruby-build cd ~/.rbenv/plugins (the plugins subdir might need to be created
@@ -312,3 +358,11 @@
 # For Chrome
 # need to figure out how to not download .rpm every time
 #
+
+# TO DO
+#
+# for redis search
+# still need to create a redis.conf file currently in ~/.config/redis.conf
+#
+# for postgres
+# need to add pgsql path to path
