@@ -166,6 +166,14 @@
       tags:
         - emacs-live
 
+    # sirflow dependencies
+    - name: install unixODBC
+      become: yes
+      dnf:
+        name: unixODBC
+        state: present
+      tags: airflowdeps
+
     # install ffdmpeg to play video on twitter
     - name: install rpmfusion repo for ffmpeg
       become: yes
