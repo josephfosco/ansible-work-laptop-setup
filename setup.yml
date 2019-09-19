@@ -232,6 +232,18 @@
         - unixODBC-devel     # for hashi (to build pyodbc)
         - git-subtree      # needed for "git catalina pull <module>"
 
+    - name: install rbenv
+      shell: |
+        loop:
+          git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+      args:
+        chdir: $HOME
+        creates: ~/.rbenv
+      notify:
+        setup rbenv
+      tags:
+        - ruby
+
     - name: download yarn
       become: yes
       shell: curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | sudo tee /etc/yum.repos.d/yarn.repo
@@ -297,6 +309,22 @@
     #     chdir: $HOME
     #   tags: libsodium-exports
 
+    # sets up bash profile for rbenv and installs ruby-build
+    - name: setup rbenv
+      shell: |
+        loop:
+          echo '' >> ~/.bash_profile
+          echo '# rbenv shims' >> ~/.bash_profile
+          echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+          export PATH="$HOME/.rbenv/bin:$PATH"
+          mkdir -p "$(rbenv root)"/plugins
+          git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
+
+      args:
+        chdir: $HOME
+      tags:
+        - ruby
+
     - name: setup nodenv
       shell: "{{ item }}"
       loop:
@@ -339,7 +367,6 @@
       # still need to create a redis.conf file currently in ~/.config/redis.conf
 
         # TO BE ADDED TO THIS
-#  - install for rbenv
 #  - install for ruby-build
 #    to install ruby-build cd ~/.rbenv/plugins (the plugins subdir might need to be created
 #       git clone https://github.com/rbenv/ruby-build
