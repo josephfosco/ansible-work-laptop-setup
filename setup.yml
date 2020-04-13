@@ -29,6 +29,7 @@
         - openssl-devel
         - xz-devel
         - findutils
+      tags: pyenv-pkgs
 
     - name: install ansible packages
       # these should have been installed manually when installing ansible
@@ -83,6 +84,14 @@
         name: libxcrypt-compat
         state: present
       tags: libsodium-compat
+
+    - name: create libsodium link
+      become: yes
+      file:
+        src: /usr/lib64/libsodium.so.23
+        dest: /usr/lib64/libsodium.so
+        state: link
+      tags: libsodium-link
 
     # - name: install leapfrog git commands
     #   shell: "{{ item }}"
@@ -271,6 +280,22 @@
         chdir: ~/src
         creates: ~/src/RediSearch
       notify: make redissearch
+
+    - name: install utility commands
+      become: yes
+      dnf:
+        name: smem
+        state: present
+      tags:
+        - utils
+
+    - name: Fedora upgrade
+      become: yes
+      dnf:
+        name: dnf-plugin-system-upgrade
+        state: present
+      tags:
+        - fedora-upgrade
 
       # **************************************************
       #  Things I am testing
