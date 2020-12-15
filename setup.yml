@@ -160,6 +160,16 @@
     - name: Install emacs
       dnf: name=emacs state=present
       become: yes
+      tags:
+        - emacs
+
+    - name: Do not upgrade emacs
+      lineinfile:
+        path: /etc/dnf/dnf.conf
+        line: exclude=emacs
+      become: yes
+      tags:
+        - emacs
 
     # - mkdir --parents .live-packs/{{ ansible_user_id }}-pack
     # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
@@ -240,6 +250,9 @@
         - python3-devel      # for hashi (to build pyodbc)
         - unixODBC-devel     # for hashi (to build pyodbc)
         - git-subtree      # needed for "git catalina pull <module>"
+        - git-lfs          # for running comcast frontend locally
+      tags:
+        - lfo-apps
 
     - name: install rbenv
       shell: |

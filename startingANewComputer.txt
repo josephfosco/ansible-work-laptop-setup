@@ -52,6 +52,30 @@ Add ssh key to github
   - create user jfosco with createdb;
   - alter user jfosco SUPERUSER;
 
+  - might have to change pg_hba.conf file to make local entry trust
+    see https://gist.github.com/AtulKsol/4470d377b448e56468baef85af7fd614
+
+- Set up pritunl so that it does not try to use it for all websites
+  - see https://docs.pritunl.com/docs/gnome-client
+  - will require the running the following commands ofter Downloading the OpenVPN
+      profile from within the pritunl UI
+
+      nmcli connection import type openvpn file Downloads/org_linux_dev.ovpn
+
+      nmcli connection
+      NAME           UUID                                  TYPE      DEVICE
+      eno1           f743c99d-3d96-4cfd-bb1c-60579b35f96f  ethernet  eno1
+      virbr0         be40c4da-4a92-499e-abfe-c54c93d717f4  bridge    virbr0
+      org_linux_dev  fa27689f-a323-41d7-a0fe-595e4486e883  vpn       --
+
+      # If all internet traffic is not being routed over VPN run this
+      nmcli connection modify org_linux_dev ipv4.never-default true
+      nmcli connection modify org_linux_dev ipv6.never-default true
+
+
+
+- Install zoom if necessary. Check zoom website for instructions
+
 - Copy ~/.aws directory to get aws access-key and secret-key
 
 
