@@ -163,14 +163,6 @@
       tags:
         - emacs
 
-    - name: Do not upgrade emacs
-      lineinfile:
-        path: /etc/dnf/dnf.conf
-        line: exclude=emacs
-      become: yes
-      tags:
-        - emacs
-
     # - mkdir --parents .live-packs/{{ ansible_user_id }}-pack
     # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
     - name: install emacs Live packs
