@@ -167,7 +167,7 @@
     # - cp -R .emacs.d/packs/template/user-template-pack .live-packs/{{ ansible_user_id }}-pack
     - name: install emacs Live packs
       shell: |
-        git clone https://github.com/overtone/emacs-live.git .emacs.d
+        git clone https://github.com/josephfosco/emacs-live.git .emacs.d
         make -C .emacs.d/packs/stable/org-pack/lib/org-mode autoloads
         git clone --recursive git@gh.leapfrogonline.net:JFosco/emacs-live-jfosco-pack.git .live-packs/{{ ansible_user_id }}-pack
         echo "(live-add-packs '(~/.live-packs/jfosco-pack))" > .emacs-live.el
